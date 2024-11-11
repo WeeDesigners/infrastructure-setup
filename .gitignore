@@ -1,0 +1,9 @@
+wi-cnmp-openrc.sh
+terraform/.env
+.*
+
+**/terraform.tfstate
+
+!.gitignore
+
+configure_env.sh
