@@ -1,12 +1,22 @@
-namespace: hephaestus-gui
-container_name: hephaestu-gui
-image: hephaestusmetrics/gui:latest
-hephaestus_url: "http://hephaestus-gui.hephaestus:8080"
-themis_url: "http://themis-executor.themis-executor:8080"
-hermes_url: "http://hermes.hermes:8080"
-kubernetes_management_url: "http://kubernetes-management.kubernetes-management:8097"
-node_port: "31111"
-zeuspol_app:
-  ip: "0.0.0.0"
-  port: "8080"
-image_pull_policy: Always
+hephaestus:
+  namespace: hephaestus
+  app_name: hephaestus-gui
+  persistent_volume: hephaestus-gui-pv
+  persistent_volume_claim: hephaestus-gui-pvc
+  storage_class_name: hephaestus-manual
+  deplyoment: hephaestus-gui-deployment
+  container:
+    name: hephaestus-gui
+    image: hephaestusmetrics/gui:latest
+    port: 8080
+  image_pull_policy: Always
+  service:
+    name: hephaestus-gui-svc
+    port: 8080
+    node_port: 31122
+
+prometheus:
+  namespace: monitoring
+  service:
+    name: monitoring-kube-prometheus-prometheus
+    port: 9090

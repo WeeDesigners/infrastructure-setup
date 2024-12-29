@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.hephaestus.persistent_volume_claim }}
+  namespace: {{ .Values.hephaestus.namespace }}
+spec:
+  storageClassName: {{ .Values.hephaestus.storage_class_name }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 25Mi

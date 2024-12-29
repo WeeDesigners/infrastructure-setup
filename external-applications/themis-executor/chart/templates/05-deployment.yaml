@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.themis_executor.app_name }}
+  namespace: {{ .Values.themis_executor.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.themis_executor.app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.themis_executor.app_name }}
+    spec:
+      serviceAccountName: {{ .Values.themis_executor.service_account }}
+      containers:
+        - name: {{ .Values.themis_executor.container_name }}
+          image: {{ .Values.themis_executor.container_image }}
+          imagePullPolicy: {{ .Values.themis_executor.image_pull_policy }}
+          env:
+            - name: DROOLS_RULES_PATH
+              value: /rules/rules.drl
+            - name: DROOLS_QUERY_AND_PROCESS_FIXED_RATE_SECONDS
+              value: "10"
+            - name: HEPHAESTUS_URL
+              value: "http://{{ .Values.hephaestus.service.name }}.{{ .Values.hephaestus.namespace }}.svc.cluster.local:{{ .Values.hephaestus.service.port}}"
+            - name: HEPHAESTUS_SELECTED_ENDPOINT
+              value: "{{ .Values.hephaestus.selected_endpoint }}"
+            - name: KUBERNETES_MASTER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.themis_executor.secrets_k8s_name }}
+                  key: KUBERNETES_MASTER
+            - name: KUBERNETES_CA_CERT_DATA
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.themis_executor.secrets_k8s_name }}
+                  key: KUBERNETES_CA_CERT_DATA
+            - name: KUBERNETES_CLIENT_CERT_DATA
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.themis_executor.secrets_k8s_name }}
+                  key: KUBERNETES_CLIENT_CERT_DATA
+            - name: KUBERNETES_CLIENT_KEY_DATA
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.themis_executor.secrets_k8s_name }}
+                  key: KUBERNETES_CLIENT_KEY_DATA
+            - name: DATA_STORAGE_ROOT_PATH
+              value: /tmp
+            - name: DATA_STORAGE_REMOVAL_PERMITTED
+              value: "true"
+            - name: MAIL_HOST
+              value: {{ .Values.mail.host }}
+            - name: MAIL_PORT
+              value: "{{ .Values.mail.port }}"
+            - name: MAIL_ADDRESS
+              value: {{ .Values.mail.address }}
+            - name: OPENSTACK_USERNAME
+              value: {{ .Values.openstack.username }}
+            - name: OPENSTACK_ENDPOINT
+              value: {{ .Values.openstack.endpoint }}
+            - name: OPENSTACK_DOMAIN_NAME
+              value: {{ .Values.openstack.domain_name }}
+            - name: OPENSTACK_DOMAIN_I_D
+              value: {{ .Values.openstack.domain_id }}
+            - name: OPENSTACK_PROJECT_I_D
+              value: {{ .Values.openstack.project_id }}
+            - name: OPENSTACK_OPENSTACK_AUTH
+              value: {{ .Values.openstack.auth }}
+            - name: SERVICE_ENABLED_HEPHAESTUS
+              value: "{{ .Values.enable_hephaestus }}"
+            - name: SERVICE_ENABLED_DROOLS
+              value: "{{ .Values.enable_drools }}"
+            - name: SOCKSHOP_LOGIN_USER_URL_SUPPLEMENT
+              value: login
+            - name: SOCKSHOP_REGISTER_USER_URL_SUPPLEMENT
+              value: register
+            - name: SOCKSHOP_CUSTOMERS_URL_SUPPLEMENT
+              value: customers
+            - name: SOCKSHOP_ADDRESSES_URL_SUPPLEMENT
+              value: addresses
+          resources:
+            limits:
+              cpu: 900m
+              memory: 900Mi
+            requests:
+              cpu: 900m
+              memory: 900Mi
+          ports:
+            - containerPort: {{ .Values.themis_executor.container_port }}
+          volumeMounts:
+            - name: rules-volume
+              mountPath: /rules
+      volumes:
+        - name: rules-volume
+          configMap:
+            name: rules

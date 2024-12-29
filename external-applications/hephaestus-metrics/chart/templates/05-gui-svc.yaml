@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.hephaestus.service.name }}
+  namespace: {{ .Values.hephaestus.namespace }}
+spec:
+  selector:
+    app: {{ .Values.hephaestus.app_name }}
+  type: NodePort
+  ports:
+    - protocol: "TCP"
+      port: {{ .Values.hephaestus.service.port }}
+      targetPort: {{ .Values.hephaestus.container.port }}
+      nodePort: {{ .Values.hephaestus.service.node_port }}
