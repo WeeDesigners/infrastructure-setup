@@ -1,0 +1,21 @@
+hermes:
+  namespace: hermes
+  app:
+    name: hermes
+  service:
+    name: hermes-service
+    port: 8080
+    node_port: 31234
+  container:
+    name: hermes
+    port: 8080
+    address: "0.0.0.0"
+    image: weedesigners/hermes:master
+    image_pull_policy: Always
+
+zeuspol:
+  namespace: zeuspol
+  service:
+    name: zeuspol-service
+    port: 8080
+    

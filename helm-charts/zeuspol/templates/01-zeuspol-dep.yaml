@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.zeuspol.app.name }}
+  namespace: {{ .Values.zeuspol.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.zeuspol.app.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.zeuspol.app.name }}
+    spec:
+      containers:
+        - name: {{ .Values.zeuspol.container.name }}
+          image: {{ .Values.zeuspol.container.image }}
+          env:
+            - name: ZEUS_ADDRESS
+              value: "{{ .Values.zeuspol.container.address }}"
+            - name: ZEUS_PORT
+              value: "{{ .Values.zeuspol.container.port }}"
+            - name: HEPHAESTUS_URL
+              value: "http://{{ .Values.hephaestus.service.name }}.{{ .Values.hephaestus.namespace }}:{{ .Values.hephaestus.service.port}}"
+            - name: THEMIS_URL
+              value: "http://{{ .Values.themis.service.name }}.{{ .Values.themis.namespace }}:{{ .Values.themis.service.port }}"
+            - name: HERMES_URL
+              value: "http://{{ .Values.hermes.service.name }}.{{ .Values.hermes.namespace}}:{{ .Values.hermes.service.port }}"
+            # - name: kubernetes-management
+            #   value: http://kubernetes-management.kubernetes-management:8097
+
+          imagePullPolicy: {{ .Values.zeuspol.container.image_pull_policy }}
+          ports:
+            - containerPort: {{ .Values.zeuspol.container.port}}
+          resources:
+            limits:
+              cpu: 900m
+              memory: 900Mi
+            requests:
+              cpu: 900m
+              memory: 900Mi

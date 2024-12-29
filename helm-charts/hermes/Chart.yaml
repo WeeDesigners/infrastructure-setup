@@ -1,6 +1,6 @@
 apiVersion: v2
-name: themis-executor-chart
-description: A Helm chart for zeuspol application
+name: hermes-chart
+description: A Helm chart for hermes application
 
 # A chart can be either an 'application' or a 'library' chart.
 #

@@ -32,9 +32,6 @@ hephaestus:
     port: 8080
   selected_endpoint: /hephaestus/selected/metrics
 
-kubernetes:
-  master_node_url: 
-
 mail:
   host: poczta.int.pl
   port: 587

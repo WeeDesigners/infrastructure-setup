@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.hermes.app.name }}
+  namespace: {{ .Values.hermes.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.hermes.app.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.hermes.app.name }}
+    spec:
+      containers:
+        - name: {{ .Values.hermes.container.name }}
+          image: {{ .Values.hermes.container.image }}
+          env:
+            - name: HERMES_ADDRESS
+              value: {{ .Values.hermes.container.address }}
+            - name: HERMES_PORT
+              value: "{{ .Values.hermes.container.port }}"
+            - name: ZEUS_URL
+              value: "http://{{ .Values.zeuspol.service.name }}.{{ .Values.zeuspol.namespace }}:{{ .Values.zeuspol.service.port }}"
+
+          imagePullPolicy: {{ .Values.hermes.container.image_pull_policy }}
+          ports:
+            - containerPort: {{ .Values.hermes.container.port }}
+          resources:
+            limits:
+              cpu: 900m
+              memory: 900Mi
+            requests:
+              cpu: 900m
+              memory: 900Mi

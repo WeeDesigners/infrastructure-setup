@@ -31,31 +31,31 @@ undeploy:
 	make undeploy-monitoring
 
 deploy-zeuspol:
-	helm install zeuspol /path/to/zeuspol/helm-chart
+	helm install zeuspol ./helm-charts/zeuspol
 
 deploy-zeuspol-local:
-	helm install zeuspol /path/to/zeuspol/helm-chart --set image_pull_policy="Never"
+	helm install zeuspol ./helm-charts/zeuspol --set zeuspol.container.image_pull_policy="Never"
 	
 undeploy-zeuspol:
 	helm uninstall zeuspol
 
 deploy-hermes:
-	helm install hermes /path/to/herme/helm-chart
+	helm install hermes ./helm-charts/hermes
 
 deploy-hermes-local:
-	helm install hermes /path/to/hermes/helm-chart --set image_pull_policy="Never"
+	helm install hermes ./helm-charts/hermes --set hermes.container.image_pull_policy="Never"
 
 undeploy-hermes:
 	helm uninstall hermes
 
 deploy-themis: check-secret
-	helm install themis ./external-applications/themis-executor/chart
+	helm install themis ./helm-charts/themis-executor
 
 undeploy-themis:
 	helm uninstall themis
 
 deploy-hephaestus:
-	helm install hephaestus ./external-applications/hephaestus-metrics/chart \
+	helm install hephaestus ./helm-charts/hephaestus-metrics \
 	--namespace hephaestus \
 	--create-namespace
 
@@ -88,3 +88,19 @@ prepare-themis-secrets:
 	$(CLUSTER_NAME) $(CLUSTER_USER) $(THEMIS_K8S_SECRET_NAME) $(THEMIS_NAMESPACE)
 
 	./external-applications/themis-executor/scripts/generate_themis_openstack_secrets.sh
+
+reset-minikube:
+	minikube stop
+	minikube delete
+	minikube start
+
+
+get-minikube-info:
+	minikube service list
+
+
+deploy-test-app:
+	kubectl apply -f deployment/TestApp
+
+undeploy-test-app:
+	kubectl delete -f deployment/TestApp --ignore-not-found=true
