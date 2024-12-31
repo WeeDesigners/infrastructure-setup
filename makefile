@@ -79,6 +79,7 @@ deploy-database:
 	--set auth.password=hermes \
 	--set auth.database=pandora_box_db \
 	--set primary.persistence.existingClaim=mysql-pvc \
+	--set primary.persistence.storageClass=mysql-manual \
 	--set namespaceOverride=mysql \
 	--namespace mysql \
 	--create-namespace \
