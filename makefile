@@ -75,9 +75,6 @@ undeploy-monitoring:
 
 deploy-database:
 	helm install mysql \
-	--set metrics.enabled=true \
-	--set metrics.prometheusRule.namespace=monitoring \
-	--set metrics.serviceMonitor.namespace=monitoring \
 	--set auth.username=hermes \
 	--set auth.password=hermes \
 	--set auth.database=pandora_box_db \
