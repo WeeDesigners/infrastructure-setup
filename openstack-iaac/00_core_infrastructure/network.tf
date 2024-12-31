@@ -25,7 +25,7 @@ resource "openstack_networking_router_interface_v2" "management_subnet_interface
 }
 
 resource "openstack_networking_secgroup_v2" "ssh_access" {
-  name        = "ssh access"
+  name        = var.ssh_access_sec_group
   description = "allow ssh access connections"
 }
 

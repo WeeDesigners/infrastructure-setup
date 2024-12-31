@@ -2,8 +2,8 @@ wi-cnmp-openrc.sh
 terraform/.env
 .*
 
-**/terraform.tfstate
+**/terraform.tfstate*
 
 !.gitignore
-
+linux_*
 configure_env.sh

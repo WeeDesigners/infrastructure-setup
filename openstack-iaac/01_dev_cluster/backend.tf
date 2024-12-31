@@ -4,7 +4,7 @@ terraform {
     organization = "weedesign"
 
     workspaces {
-      name = "core-infrastructure"
+      name = "dev-cluster"
     }
   }
 }

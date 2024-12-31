@@ -7,7 +7,7 @@ data "openstack_networking_floatingip_v2" "floatingip_1" {
 }
 
 resource "openstack_networking_port_v2" "access_machine_port" {
-  name               = "cluster_1_port"
+  name               = "access_machine_port"
   network_id         = openstack_networking_network_v2.project_network.id
   admin_state_up     = "true"
   security_group_ids = [openstack_networking_secgroup_v2.ssh_access.id]

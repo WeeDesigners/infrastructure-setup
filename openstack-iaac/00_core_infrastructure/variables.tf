@@ -3,6 +3,11 @@ variable "access_machine_floating_ip" {
   description = "Floating ip for the access machine"
 }
 
+variable "ssh_access_sec_group" {
+  type = string
+  description = "Name of the security group that will allow ssh access to the machine ( should already be in openstack during apply of this terraform)"
+  default = "ssh access"
+}
 /* variable "project_id" {
   description = "OpenStack project id"
   type        = string
