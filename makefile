@@ -12,15 +12,17 @@ CLUSTER_USER ?= kubernetes-admin
 deploy: check-secret
 	make deplloy-monitoring
 	make deploy-hephaestus
-	make deploy-zeuspol
+	make deploy-database
 	make deploy-hermes
+	make deploy-zeuspol
 	make deploy-themis
 
 deploy-local: check-secret
 	make deplloy-monitoring
 	make deploy-hephaestus
-	make deploy-zeuspol-local
+	make deploy-database
 	make deploy-hemers-local
+	make deploy-zeuspol-local
 	make deploy-themis
 
 undeploy:
@@ -29,6 +31,7 @@ undeploy:
 	make undeploy-themis
 	make undeploy-hephaestus
 	make undeploy-monitoring
+	make undeploy-database
 
 deploy-zeuspol:
 	helm install zeuspol ./helm-charts/zeuspol
@@ -69,6 +72,23 @@ deploy-monitoring:
 
 undeploy-monitoring:
 	helm uninstall monitoring
+
+deploy-database:
+	helm install mysql \
+	--set metrics.enabled=true \
+	--set metrics.prometheusRule.namespace=monitoring \
+	--set metrics.serviceMonitor.namespace=monitoring \
+	--set auth.username=hermes \
+	--set auth.password=hermes \
+	--set auth.database=pandora_box_db \
+	--set namespaceOverride=mysql \
+	--namespace mysql \
+	--create-namespace \
+	oci://registry-1.docker.io/bitnamicharts/mysql
+
+undeploy-database:
+	helm uninstall mysql
+
 # ! Themis will not be able to interact with kubernetes and openstack API without these secrets set 
 check-secret:
 	@kubectl get secret $(THEMIS_SECRET_NAME) -n $(THEMIS_NAMESPACE) >/dev/null 2>&1 && \
@@ -94,10 +114,8 @@ reset-minikube:
 	minikube delete
 	minikube start
 
-
 get-minikube-info:
 	minikube service list
-
 
 deploy-test-app:
 	kubectl apply -f deployment/TestApp

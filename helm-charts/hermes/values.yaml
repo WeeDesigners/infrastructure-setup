@@ -19,3 +19,8 @@ zeuspol:
     name: zeuspol-service
     port: 8080
     
+mysql:
+  username: "hermes"
+  password: "hermes"
+  url: "jdbc:mysql://mysql.default.svc.cluster.local:3306"
+  database_name: "pandora_box_db"

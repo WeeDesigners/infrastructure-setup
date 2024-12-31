@@ -23,6 +23,12 @@ spec:
               value: "{{ .Values.hermes.container.port }}"
             - name: ZEUS_URL
               value: "http://{{ .Values.zeuspol.service.name }}.{{ .Values.zeuspol.namespace }}:{{ .Values.zeuspol.service.port }}"
+            - name: DATABASE_URL
+              value: "{{ .Values.mysql.url }}/{{ .Values.mysql.database_name }}"
+            - name: DATABASE_USER
+              value: {{ .Values.mysql.username }}
+            - name: DATABASE_PASSWORD
+              value: {{ .Values.mysql.password }}
 
           imagePullPolicy: {{ .Values.hermes.container.image_pull_policy }}
           ports:
