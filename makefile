@@ -81,13 +81,14 @@ deploy-database:
 	--set auth.username=hermes \
 	--set auth.password=hermes \
 	--set auth.database=pandora_box_db \
+	--set primary.persistence.existingClaim=mysql-pvc \
 	--set namespaceOverride=mysql \
 	--namespace mysql \
 	--create-namespace \
 	oci://registry-1.docker.io/bitnamicharts/mysql
 
 undeploy-database:
-	helm uninstall mysql
+	helm uninstall mysql -n mysql
 
 # ! Themis will not be able to interact with kubernetes and openstack API without these secrets set 
 check-secret:
