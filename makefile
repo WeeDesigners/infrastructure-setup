@@ -27,7 +27,7 @@ deploy-local: check-secret
 	make deploy-themis
 
 undeploy:
-	helm uninstall nfs-ganesha
+	helm uninstall nfs-ganesha || true
 	make undeploy-zeuspol || true
 	make undeploy-hermes || true
 	make undeploy-themis || true
