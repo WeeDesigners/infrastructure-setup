@@ -76,19 +76,10 @@ undeploy-monitoring:
 	helm uninstall monitoring -n monitoring
 
 deploy-database:
-	helm install mysql \
-	--set global.defaultStorageClass=nfs \
-	--set auth.username=hermes \
-	--set auth.password=hermes \
-	--set auth.database=pandora_box_db \
-	--set namespaceOverride=mysql \
-	--namespace mysql \
-	--create-namespace \
-	oci://registry-1.docker.io/bitnamicharts/mysql
+	kubectl apply -f manifests/mysql
 
 undeploy-database:
-	helm uninstall mysql -n mysql
-
+	kubectl delete -f manifests/mysql
 # ! Themis will not be able to interact with kubernetes and openstack API without these secrets set 
 check-secret:
 	@kubectl get secret $(THEMIS_K8S_SECRET_NAME) -n $(THEMIS_NAMESPACE) >/dev/null 2>&1 && \
