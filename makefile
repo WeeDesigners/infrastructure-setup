@@ -10,7 +10,7 @@ CLUSTER_NAME ?= kubernetes
 CLUSTER_USER ?= kubernetes-admin
 
 deploy: check-secret
-	make deplloy-monitoring
+	make deploy-monitoring
 	make deploy-hephaestus
 	make deploy-database
 	make deploy-hermes
@@ -18,19 +18,19 @@ deploy: check-secret
 	make deploy-themis
 
 deploy-local: check-secret
-	make deplloy-monitoring
+	make deploy-monitoring
 	make deploy-hephaestus
 	make deploy-database
-	make deploy-hemers-local
+	make deploy-hermes-local
 	make deploy-zeuspol-local
 	make deploy-themis
 
 undeploy:
-	make undeploy-zeuspol
-	make undeploy-hermes
-	make undeploy-themis
-	make undeploy-hephaestus
-	make undeploy-monitoring
+	make undeploy-zeuspol || true
+	make undeploy-hermes || true
+	make undeploy-themis || true
+	make undeploy-hephaestus || true
+	make undeploy-monitoring || true
 	make undeploy-database
 
 deploy-zeuspol:
@@ -63,7 +63,7 @@ deploy-hephaestus:
 	--create-namespace
 
 undeploy-hephaestus:
-	helm uninstall hephaestus
+	helm uninstall hephaestus -n hephaestus
 
 deploy-monitoring:
 	helm install monitoring prometheus-community/kube-prometheus-stack \
@@ -71,15 +71,13 @@ deploy-monitoring:
 	--create-namespace
 
 undeploy-monitoring:
-	helm uninstall monitoring
+	helm uninstall monitoring -n monitoring
 
 deploy-database:
 	helm install mysql \
 	--set auth.username=hermes \
 	--set auth.password=hermes \
 	--set auth.database=pandora_box_db \
-	--set primary.persistence.existingClaim=mysql-pvc \
-	--set primary.persistence.storageClass=mysql-manual \
 	--set namespaceOverride=mysql \
 	--namespace mysql \
 	--create-namespace \
@@ -90,23 +88,23 @@ undeploy-database:
 
 # ! Themis will not be able to interact with kubernetes and openstack API without these secrets set 
 check-secret:
-	@kubectl get secret $(THEMIS_SECRET_NAME) -n $(THEMIS_NAMESPACE) >/dev/null 2>&1 && \
-		echo "Using themis configuration from secret: $(THEMIS_SECRET_NAME)" || \
-		echo "No secret with name: $(THEMIS_SECRET_NAME) found. aborting deploy"
+	@kubectl get secret $(THEMIS_K8S_SECRET_NAME) -n $(THEMIS_NAMESPACE) >/dev/null 2>&1 && \
+		echo "Using themis configuration from secret: $(THEMIS_K8S_SECRET_NAME)" || \
+		( echo "No secret with name: $(THEMIS_K8S_SECRET_NAME) found. aborting deploy" && exit 1)
 
 prepare-helm-repo:
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo update
 
 prepare-themis-secrets-minikube:
-	./external-applications/themis-executor/scripts/generate_themis_k8s_secrets.sh \
+	./scripts/generate_themis_k8s_secrets.sh \
 	minikube minikube $(THEMIS_K8S_SECRET_NAME) $(THEMIS_NAMESPACE)
 
 prepare-themis-secrets:
-	./external-applications/themis-executor/scripts/generate_themis_k8s_secrets.sh \
+	./scripts/generate_themis_k8s_secrets.sh \
 	$(CLUSTER_NAME) $(CLUSTER_USER) $(THEMIS_K8S_SECRET_NAME) $(THEMIS_NAMESPACE)
 
-	./external-applications/themis-executor/scripts/generate_themis_openstack_secrets.sh
+	./scripts/generate_themis_openstack_secrets.sh
 
 reset-minikube:
 	minikube stop
