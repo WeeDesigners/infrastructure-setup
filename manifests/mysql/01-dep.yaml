@@ -25,17 +25,17 @@ spec:
         app: mysql
     spec:
       containers:
-      - image: mysql:9.1.0
+      - image: mysql:5.6
         name: mysql
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: hermes
+          value: "hermes"
         - name: MYSQL_USER
-          value: hermes
+          value: "hermes"
         - name: MYSQL_PASSWORD
-          value: hermes
+          value: "hermes"
         - name: MYSQL_DATABASE
-          value: pandora_box_db
+          value: "pandora_box_db"
         ports:
         - containerPort: 3306
           name: mysql
