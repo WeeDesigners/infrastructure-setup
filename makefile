@@ -77,6 +77,7 @@ undeploy-monitoring:
 
 deploy-database:
 	helm install mysql \
+	--set global.defaultStorageClass=nfs \
 	--set auth.username=hermes \
 	--set auth.password=hermes \
 	--set auth.database=pandora_box_db \
