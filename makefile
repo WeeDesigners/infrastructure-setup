@@ -10,6 +10,7 @@ CLUSTER_NAME ?= kubernetes
 CLUSTER_USER ?= kubernetes-admin
 
 deploy: check-secret
+	helm install nfs-ganesha nfs-ganesha-server-and-external-provisioner/nfs-server-provisioner
 	make deploy-monitoring
 	make deploy-hephaestus
 	make deploy-database
@@ -26,6 +27,7 @@ deploy-local: check-secret
 	make deploy-themis
 
 undeploy:
+	helm uninstall nfs-ganesha
 	make undeploy-zeuspol || true
 	make undeploy-hermes || true
 	make undeploy-themis || true
@@ -94,6 +96,7 @@ check-secret:
 
 prepare-helm-repo:
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+	helm repo add nfs-ganesha-server-and-external-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner/
 	helm repo update
 
 prepare-themis-secrets-minikube:
