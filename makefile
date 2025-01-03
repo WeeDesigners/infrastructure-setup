@@ -83,9 +83,11 @@ undeploy-hephaestus:
 deploy-monitoring:
 	git clone https://github.com/microservices-demo/microservices-demo.git ./.monitoring
 	kubectl apply -f .monitoring/deploy/kubernetes/manifests-monitoring
+	kubectl apply -f .monitoring/deploy/kubernetes/manifests
 	
 undeploy-monitoring:
 	kubectl delete -f .monitoring/deploy/kubernetes/manifests-monitoring
+	kubectl delete -f .monitoring/deploy/kubernetes/manifests
 		
 # kubecRBACProxy is used to enable a cluster role for prometheus, so it can query the metrics
 # deploy-monitoring:
@@ -113,6 +115,7 @@ deploy-metrics-server:
 	
 undeploy-metrics-server:
 	helm uninstall metrics-server bitnami/metrics-server --version 7.3.0
+	
 
 deploy-database:
 	kubectl apply -f manifests/mysql
