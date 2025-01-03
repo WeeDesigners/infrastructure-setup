@@ -24,6 +24,7 @@ clean-deploy-minikube:
 	make deploy-hermes
 	make deploy-themis
 	make deploy-zeuspol
+	make deploy-example-app
 
 deploy: check-secret
 	make deploy-monitoring
@@ -32,6 +33,7 @@ deploy: check-secret
 	make deploy-hermes
 	make deploy-zeuspol
 	make deploy-themis
+	make deploy-example-app
 
 deploy-local: check-secret
 	make deploy-monitoring
@@ -39,6 +41,8 @@ deploy-local: check-secret
 	make deploy-database
 	make deploy-hermes-local
 	make deploy-zeuspol-local
+	make deploy-themis
+	make deploy-example-app
 
 undeploy:
 	make undeploy-zeuspol || true
@@ -47,6 +51,7 @@ undeploy:
 	make undeploy-hephaestus || true
 	make undeploy-monitoring || true
 	make undeploy-database
+	make undeploy-example-app
 
 deploy-zeuspol:
 	helm install zeuspol ./helm-charts/zeuspol
@@ -116,6 +121,11 @@ deploy-metrics-server:
 undeploy-metrics-server:
 	helm uninstall metrics-server bitnami/metrics-server --version 7.3.0
 	
+deploy-example-app:
+	kubectl apply -f manifests/example-app
+
+undeploy-example-app:
+	kubectl delete -f manifests/example-app
 
 deploy-database:
 	kubectl apply -f manifests/mysql
