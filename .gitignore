@@ -7,3 +7,5 @@ terraform/.env
 !.gitignore
 
 configure_env.sh
+
+.monitoring
