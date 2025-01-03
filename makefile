@@ -9,7 +9,23 @@ THEMIS_OPENSTACK_SECRET_NAME ?= themis-secrects-openstack
 CLUSTER_NAME ?= kubernetes
 CLUSTER_USER ?= kubernetes-admin
 
-deploy: check-secret prepare-helm-repo
+clean-deploy-minikube:
+	minikube stop
+	minikube delete
+
+	minikube start --memory 12288 --cpus 6
+	minikube addons enable metrics-server
+	make prepare-helm-repo
+	make prepare-themis-secrets-minikube
+	make deploy-metrics-server
+	make deploy-monitoring
+	make deploy-hephaestus
+	make deploy-database
+	make deploy-hermes
+	make deploy-themis
+	make deploy-zeuspol
+
+deploy: check-secret
 	make deploy-monitoring
 	make deploy-hephaestus
 	make deploy-database
@@ -23,7 +39,6 @@ deploy-local: check-secret
 	make deploy-database
 	make deploy-hermes-local
 	make deploy-zeuspol-local
-	make deploy-themis
 
 undeploy:
 	make undeploy-zeuspol || true
@@ -73,11 +88,19 @@ deploy-monitoring:
 undeploy-monitoring:
 	helm uninstall monitoring -n monitoring
 
+deploy-metrics-server:
+	helm install metrics-server bitnami/metrics-server --version 7.3.0 \
+	--set apiService.create=true
+	
+undeploy-metrics-server:
+	helm uninstall metrics-server bitnami/metrics-server --version 7.3.0
+
 deploy-database:
 	kubectl apply -f manifests/mysql
 
 undeploy-database:
 	kubectl delete -f manifests/mysql
+
 # ! Themis will not be able to interact with kubernetes and openstack API without these secrets set 
 check-secret:
 	@kubectl get secret $(THEMIS_K8S_SECRET_NAME) -n $(THEMIS_NAMESPACE) >/dev/null 2>&1 && \
@@ -86,6 +109,7 @@ check-secret:
 
 prepare-helm-repo:
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+	helm repo add bitnami https://charts.bitnami.com/bitnami
 	helm repo update
 
 prepare-themis-secrets-minikube:
@@ -111,3 +135,7 @@ deploy-test-app:
 
 undeploy-test-app:
 	kubectl delete -f deployment/TestApp --ignore-not-found=true
+	
+check-reequirements:
+	kubectl --version
+	yq --version

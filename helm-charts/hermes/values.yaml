@@ -22,5 +22,5 @@ zeuspol:
 mysql:
   username: "hermes"
   password: "hermes"
-  url: "jdbc:mysql://mysql.default.svc.cluster.local:3306"
+  url: "jdbc:mysql://mysql.mysql.svc.cluster.local:3306"
   database_name: "pandora_box_db"

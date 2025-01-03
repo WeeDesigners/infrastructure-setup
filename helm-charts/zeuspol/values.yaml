@@ -7,7 +7,7 @@ zeuspol:
     port: 8080
     node_port: 32137
   container:
-    image: weedesigners/zeuspol:latest
+    image: weedesigners/zeuspol:main
     port: 8080
     address: "0.0.0.0"
     name: zeuspol
