@@ -9,7 +9,7 @@ THEMIS_OPENSTACK_SECRET_NAME ?= themis-secrects-openstack
 CLUSTER_NAME ?= kubernetes
 CLUSTER_USER ?= kubernetes-admin
 
-deploy: check-secret
+deploy: check-secret prepare-helm-repo
 	make deploy-monitoring
 	make deploy-hephaestus
 	make deploy-database

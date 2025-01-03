@@ -4,9 +4,11 @@ metadata:
   name: {{ .Values.hermes.service.name }}
   namespace: {{ .Values.hermes.namespace }}
 spec:
+  type: NodePort
   selector:
     app: {{ .Values.hermes.app.name }}
   ports:
     - protocol: "TCP"
       port: {{ .Values.hermes.service.port }}
       targetPort: {{ .Values.hermes.container.port }}
+      nodePort: {{ .Values.hermes.service.node_port }}
