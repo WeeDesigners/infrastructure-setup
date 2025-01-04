@@ -17,7 +17,6 @@ clean-deploy-minikube:
 	minikube addons enable metrics-server
 	make prepare-helm-repo
 	make prepare-themis-secrets-minikube
-	make deploy-metrics-server
 	make deploy-monitoring
 	make deploy-hephaestus
 	make deploy-database
@@ -85,34 +84,33 @@ deploy-hephaestus:
 undeploy-hephaestus:
 	helm uninstall hephaestus -n hephaestus
 
-deploy-monitoring:
-	git clone https://github.com/microservices-demo/microservices-demo.git ./.monitoring
-	kubectl apply -f .monitoring/deploy/kubernetes/manifests-monitoring
-	kubectl apply -f .monitoring/deploy/kubernetes/manifests
+# deploy-monitoring:
+# 	git clone https://github.com/microservices-demo/microservices-demo.git ./.monitoring
+# 	kubectl apply -f .monitoring/deploy/kubernetes/manifests-monitoring
+# 	kubectl apply -f .monitoring/deploy/kubernetes/manifests
 	
-undeploy-monitoring:
-	kubectl delete -f .monitoring/deploy/kubernetes/manifests-monitoring
-	kubectl delete -f .monitoring/deploy/kubernetes/manifests
+# undeploy-monitoring:
+# 	kubectl delete -f .monitoring/deploy/kubernetes/manifests-monitoring
+# 	kubectl delete -f .monitoring/deploy/kubernetes/manifests
 		
 # kubecRBACProxy is used to enable a cluster role for prometheus, so it can query the metrics
-# deploy-monitoring:
-# 	helm install monitoring prometheus-community/kube-prometheus-stack \
-# 	--set kubeRBACProxy.enabled=true \
-# 	--namespace monitoring \
-# 	--create-namespace
+deploy-monitoring:
+	helm install monitoring prometheus-community/kube-prometheus-stack \
+	--namespace monitoring \
+	--create-namespace
 
-# undeploy-monitoring:
-# 	helm uninstall monitoring -n monitoring
-# 	kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
-# 	kubectl delete crd alertmanagers.monitoring.coreos.com
-# 	kubectl delete crd podmonitors.monitoring.coreos.com
-# 	kubectl delete crd probes.monitoring.coreos.com
-# 	kubectl delete crd prometheusagents.monitoring.coreos.com
-# 	kubectl delete crd prometheuses.monitoring.coreos.com
-# 	kubectl delete crd prometheusrules.monitoring.coreos.com
-# 	kubectl delete crd scrapeconfigs.monitoring.coreos.com
-# 	kubectl delete crd servicemonitors.monitoring.coreos.com
-# 	kubectl delete crd thanosrulers.monitoring.coreos.com
+undeploy-monitoring:
+	helm uninstall monitoring -n monitoring
+	kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
+	kubectl delete crd alertmanagers.monitoring.coreos.com
+	kubectl delete crd podmonitors.monitoring.coreos.com
+	kubectl delete crd probes.monitoring.coreos.com
+	kubectl delete crd prometheusagents.monitoring.coreos.com
+	kubectl delete crd prometheuses.monitoring.coreos.com
+	kubectl delete crd prometheusrules.monitoring.coreos.com
+	kubectl delete crd scrapeconfigs.monitoring.coreos.com
+	kubectl delete crd servicemonitors.monitoring.coreos.com
+	kubectl delete crd thanosrulers.monitoring.coreos.com
 
 deploy-metrics-server:
 	helm install metrics-server bitnami/metrics-server --version 7.3.0 \
