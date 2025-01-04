@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.hephaestus.deplyoment }}
+  namespace: {{ .Values.hephaestus.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.hephaestus.app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.hephaestus.app_name }}
+    spec:
+      containers:
+        - name: {{ .Values.hephaestus.container.name }}
+          image: {{ .Values.hephaestus.container.image }}
+          env:
+          - name: prometheus.address
+            value: "{{ .Values.prometheus.service.name }}.{{ .Values.prometheus.namespace }}:{{ .Values.prometheus.service.port }}"
+          - name: saved.path
+            value: /../storage/metrics/savedMetrics/metrics.json
+          - name: config.path
+            value: /../storage/metrics/configMetrics/metrics.json
+          - name: logs.path
+            value: /../storage/logs
+          imagePullPolicy: {{ .Values.hephaestus.image_pull_policy }}
+          ports:
+            - containerPort: {{ .Values.hephaestus.container.port }}
+          volumeMounts:
+            - name: storage
+              mountPath: storage
+            # - name: config-volume
+            #   mountPath: storage/metrics/configMetrics
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.hephaestus.persistent_volume_claim }}
+        # - name: config-volume
+        #   configMap:
+        #     name: gui-configmap
+        #     items:
+        #     - key: metrics.json
+        #       path: metrics.json 

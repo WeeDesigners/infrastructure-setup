@@ -1,0 +1,33 @@
+zeuspol:
+  app:
+    name: zeuspol
+  namespace: zeuspol
+  service:
+    name: zeuspol-service
+    port: 8080
+    node_port: 32137
+  container:
+    image: weedesigners/zeuspol:main
+    port: 8080
+    address: "0.0.0.0"
+    name: zeuspol
+    image_pull_policy: Always
+  
+hephaestus:
+  namespace: hephaestus
+  service:
+    name: hephaestus-service
+    port: 8080
+  selected_endpoint: /hephaestus/selected/metrics
+
+themis:
+  namespace: themis-executor
+  service:
+    name: themis-service
+    port: 8080
+
+hermes:
+  namespace: hermes
+  service:
+    name: hermes-service
+    port: 8080

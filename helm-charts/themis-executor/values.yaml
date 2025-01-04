@@ -1,0 +1,38 @@
+enable_hephaestus: false
+enable_drools: false
+
+themis_executor:
+  app_name: themis-executor
+  namespace: themis-executor
+  service:
+    name: themis-service
+    port: 8080
+    node_port: 31111
+  container_image: k8loud/themis-executor:0.0.4.4
+  container_port: 8080
+  image_pull_policy: Always
+  container_name: themis
+  secrets_k8s_name: themis-secrets-k8s
+  service_account: themis-executor-sa
+  cluster_role: themis-executor-cr
+  cluster_role_binding: themis-executor-crb
+
+openstack:
+  username: plgsocz
+  endpoint: https://api.cloud.cyfronet.pl:5000/v3  
+  domain_name: Default
+  domain_id: default
+  project_id: 795986d75bae4609aec541f073213917
+  auth: PROJECT_SCOPED
+  
+hephaestus:
+  namespace: hephaestus
+  service:
+    name: hephaestus-service
+    port: 8080
+  selected_endpoint: /hephaestus/selected/metrics
+
+mail:
+  host: poczta.int.pl
+  port: 587
+  address: linstonoszpat@int.pl

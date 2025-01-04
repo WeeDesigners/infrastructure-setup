@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rules
+  namespace: {{ .Values.themis_executor.namespace }}
+data:
+  rules.drl: |
+    dialect "mvel"
+
+    rule "test"
+      when
+        eval( true )
+      then
+        System.out.println("test rule triggered");
+    end

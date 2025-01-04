@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.zeuspol.service.name }}
+  namespace: {{ .Values.zeuspol.namespace }}
+spec:
+  selector:
+    app: {{ .Values.zeuspol.app.name }}
+  type: NodePort
+  ports:
+    - protocol: "TCP"
+      port: {{ .Values.zeuspol.service.port }}
+      targetPort: {{ .Values.zeuspol.container.port }}
+      nodePort: {{ .Values.zeuspol.service.node_port }}
