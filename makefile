@@ -8,7 +8,7 @@ THEMIS_OPENSTACK_SECRET_NAME ?= themis-secrects-openstack
 
 CLUSTER_NAME ?= kubernetes
 CLUSTER_USER ?= kubernetes-admin
-
+# TODO: mysql database is sometimes having problems with the deployment due existent PV and PVCs
 restart-minikube:
 	minikube delete
 	minikube start --cpus 4 --memory 4096
@@ -18,7 +18,7 @@ restart-minikube:
 test-scenario-minikube:
 	make prepare-helm-repo
 	make deploy-monitoring
-	make deploy-ingress	
+	make deploy-ingress
 	
 	make deploy-amocna-stack	
 	
@@ -32,7 +32,7 @@ destroy-test-scenerio:
 
 deploy-amocna-stack:
 	make deploy-hephaestus
-	make deploy-database
+	make mysql
 	make deploy-hermes
 	make prepare-themis-secrets-minikube
 	make deploy-themis
@@ -40,7 +40,7 @@ deploy-amocna-stack:
 
 undeploy-amocna-stack:
 	make undeploy-hephaestus  || true
-	make undeploy-database || true
+	make d-mysql || true
 	make undeploy-hermes || true
 	make undeploy-themis || true
 	make undeploy-zeuspol || true
@@ -56,7 +56,7 @@ clean-deploy-minikube:
 	make prepare-themis-secrets-minikube
 	make deploy-monitoring
 	make deploy-hephaestus
-	make deploy-database
+	make deploy-mysql
 	make deploy-hermes
 	make deploy-themis
 	make deploy-zeuspol
@@ -65,7 +65,7 @@ clean-deploy-minikube:
 deploy: check-secret
 	make deploy-monitoring
 	make deploy-hephaestus
-	make deploy-database
+	make mysql
 	make deploy-hermes
 	make deploy-zeuspol
 	make deploy-themis
@@ -74,7 +74,7 @@ deploy: check-secret
 deploy-local: check-secret
 	make deploy-monitoring
 	make deploy-hephaestus
-	make deploy-database
+	make mysql
 	make deploy-hermes-local
 	make deploy-zeuspol-local
 	make deploy-themis
@@ -86,7 +86,7 @@ undeploy:
 	make undeploy-themis || true
 	make undeploy-hephaestus || true
 	make undeploy-monitoring || true
-	make undeploy-database || true
+	make d-mysql || true
 	make undeploy-example-app
 
 deploy-zeuspol:
@@ -219,3 +219,19 @@ undeploy-test-app:
 check-reequirements:
 	kubectl --version
 	yq --version
+
+mysql:
+	helm install mysql bitnami/mysql --version 12.2.1 \
+	--namespace mysql \
+	--create-namespace \
+	--set volumePermissions.enabled=true \
+	--set auth.database=pandora_box_db \
+	--set primary.service.type=NodePort \
+	--set primary.service.nodePorts.mysql=31222 \
+	--set primary.service.nodePorts.mysqlx=31223 \
+	--set auth.username=hermes \
+	--set auth.rooPassword=hermes \
+	--set auth.password=hermes 
+
+d-mysql:
+	helm uninstall mysql -n mysql

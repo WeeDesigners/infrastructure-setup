@@ -25,7 +25,7 @@ themis:
   service:
     name: themis-service
     port: 8080
-~~
+
 hermes:
   namespace: hermes
   service:
