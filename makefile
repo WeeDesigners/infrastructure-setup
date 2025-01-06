@@ -9,6 +9,29 @@ THEMIS_OPENSTACK_SECRET_NAME ?= themis-secrects-openstack
 CLUSTER_NAME ?= kubernetes
 CLUSTER_USER ?= kubernetes-admin
 
+restart-minikube:
+	minikube delete
+	minikube start --cpus 4 --memory 4096
+	minikube addons enable metrics-server
+
+# ! IMPORTANT: in order for the test to run correctly run `minikube tunnel` in separate terminal
+test-scenario-minikube:
+	make prepare-helm-repo
+	make deploy-monitoring
+	make deploy-ingress	
+	
+	make deploy-amocna-stack	
+	
+	make deploy-response-time-test-app
+
+deploy-amocna-stack:
+	make deploy-hephaestus
+	make deploy-database
+	make deploy-hermes
+	make prepare-themis-secrets-minikube
+	make deploy-themis
+	make deploy-zeuspol
+
 clean-deploy-minikube:
 	minikube stop
 	minikube delete
@@ -84,20 +107,12 @@ deploy-hephaestus:
 undeploy-hephaestus:
 	helm uninstall hephaestus -n hephaestus
 
-# deploy-monitoring:
-# 	git clone https://github.com/microservices-demo/microservices-demo.git ./.monitoring
-# 	kubectl apply -f .monitoring/deploy/kubernetes/manifests-monitoring
-# 	kubectl apply -f .monitoring/deploy/kubernetes/manifests
-	
-# undeploy-monitoring:
-# 	kubectl delete -f .monitoring/deploy/kubernetes/manifests-monitoring
-# 	kubectl delete -f .monitoring/deploy/kubernetes/manifests
-		
-# kubecRBACProxy is used to enable a cluster role for prometheus, so it can query the metrics
 deploy-monitoring:
-	helm install monitoring prometheus-community/kube-prometheus-stack \
-	--namespace monitoring \
-	--create-namespace
+	helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+	--namespace monitoring  \
+	--create-namespace \
+	--set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false \
+	--set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
 
 undeploy-monitoring:
 	helm uninstall monitoring -n monitoring
@@ -111,6 +126,17 @@ undeploy-monitoring:
 	kubectl delete crd scrapeconfigs.monitoring.coreos.com
 	kubectl delete crd servicemonitors.monitoring.coreos.com
 	kubectl delete crd thanosrulers.monitoring.coreos.com
+	
+deploy-ingress:
+	helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+	--namespace ingress-nginx --create-namespace \
+	--namespace ingress-nginx \
+	--set controller.metrics.enabled=true \
+	--set controller.metrics.serviceMonitor.enabled=true \
+	--set controller.metrics.serviceMonitor.additionalLabels.release="monitoring"
+
+undeploy-ingress:
+	helm uninstall ingress-nginx -n ingress-nginx
 
 deploy-metrics-server:
 	helm install metrics-server bitnami/metrics-server --version 7.3.0 \
@@ -124,6 +150,13 @@ deploy-example-app:
 
 undeploy-example-app:
 	kubectl delete -f manifests/example-app
+
+deploy-response-time-test-app:
+	kubectl apply -f TestScenarios/response-time/manifests
+	./TestScenarios/response-time/scripts/update_hosts_file.sh
+
+undeploy-response-time-test-app:
+	kubectl delete -f TestScenarios/response-time/manifests
 
 deploy-database:
 	kubectl apply -f manifests/mysql
