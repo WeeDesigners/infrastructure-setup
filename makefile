@@ -24,6 +24,12 @@ test-scenario-minikube:
 	
 	make deploy-response-time-test-app
 
+destroy-test-scenerio:
+	make undeploy-response-time-test-app
+	make undeploy-amocna-stack
+	make undeploy-ingress
+	make undeploy-monitoring
+
 deploy-amocna-stack:
 	make deploy-hephaestus
 	make deploy-database
@@ -31,6 +37,14 @@ deploy-amocna-stack:
 	make prepare-themis-secrets-minikube
 	make deploy-themis
 	make deploy-zeuspol
+
+undeploy-amocna-stack:
+	make undeploy-hephaestus  || true
+	make undeploy-database || true
+	make undeploy-hermes || true
+	make undeploy-themis || true
+	make undeploy-zeuspol || true
+	make delete-themis-secrets
 
 clean-deploy-minikube:
 	minikube stop
@@ -72,7 +86,7 @@ undeploy:
 	make undeploy-themis || true
 	make undeploy-hephaestus || true
 	make undeploy-monitoring || true
-	make undeploy-database
+	make undeploy-database || true
 	make undeploy-example-app
 
 deploy-zeuspol:
@@ -184,6 +198,9 @@ prepare-themis-secrets:
 	$(CLUSTER_NAME) $(CLUSTER_USER) $(THEMIS_K8S_SECRET_NAME) $(THEMIS_NAMESPACE)
 
 	./scripts/generate_themis_openstack_secrets.sh
+
+delete-themis-secrets:
+	kubectl delete secrete -n $(THEMIS_NAMESPACE) $(THEMIS_K8S_SECRET_NAME) 
 
 reset-minikube:
 	minikube stop
