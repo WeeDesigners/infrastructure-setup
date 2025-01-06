@@ -16,7 +16,7 @@ zeuspol:
 hephaestus:
   namespace: hephaestus
   service:
-    name: hephaestus-service
+    name: hephaestus-gui-svc
     port: 8080
   selected_endpoint: /hephaestus/selected/metrics
 

@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: example-app
+    release: monitoring
+  name: example-app
+spec:
+  endpoints:
+  - port: http
+    path: /metrics
+  selector:
+    matchLabels:
+      app: example-app
+  podMetricsEndpoints:
+  - port: web

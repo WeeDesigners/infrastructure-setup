@@ -8,6 +8,43 @@ THEMIS_OPENSTACK_SECRET_NAME ?= themis-secrects-openstack
 
 CLUSTER_NAME ?= kubernetes
 CLUSTER_USER ?= kubernetes-admin
+# TODO: mysql database is sometimes having problems with the deployment due existent PV and PVCs
+restart-minikube:
+	minikube delete
+	minikube start --cpus 4 --memory 4096
+	minikube addons enable metrics-server
+
+# ! IMPORTANT: in order for the test to run correctly run `minikube tunnel` in separate terminal
+test-scenario-minikube:
+	make prepare-helm-repo
+	make deploy-monitoring
+	make deploy-ingress
+	
+	make deploy-amocna-stack	
+	
+	make deploy-response-time-test-app
+
+destroy-test-scenerio:
+	make undeploy-response-time-test-app
+	make undeploy-amocna-stack
+	make undeploy-ingress
+	make undeploy-monitoring
+
+deploy-amocna-stack:
+	make deploy-hephaestus
+	make mysql
+	make deploy-hermes
+	make prepare-themis-secrets-minikube
+	make deploy-themis
+	make deploy-zeuspol
+
+undeploy-amocna-stack:
+	make undeploy-hephaestus  || true
+	make d-mysql || true
+	make undeploy-hermes || true
+	make undeploy-themis || true
+	make undeploy-zeuspol || true
+	make delete-themis-secrets
 
 clean-deploy-minikube:
 	minikube stop
@@ -19,7 +56,7 @@ clean-deploy-minikube:
 	make prepare-themis-secrets-minikube
 	make deploy-monitoring
 	make deploy-hephaestus
-	make deploy-database
+	make deploy-mysql
 	make deploy-hermes
 	make deploy-themis
 	make deploy-zeuspol
@@ -28,7 +65,7 @@ clean-deploy-minikube:
 deploy: check-secret
 	make deploy-monitoring
 	make deploy-hephaestus
-	make deploy-database
+	make mysql
 	make deploy-hermes
 	make deploy-zeuspol
 	make deploy-themis
@@ -37,7 +74,7 @@ deploy: check-secret
 deploy-local: check-secret
 	make deploy-monitoring
 	make deploy-hephaestus
-	make deploy-database
+	make mysql
 	make deploy-hermes-local
 	make deploy-zeuspol-local
 	make deploy-themis
@@ -49,7 +86,7 @@ undeploy:
 	make undeploy-themis || true
 	make undeploy-hephaestus || true
 	make undeploy-monitoring || true
-	make undeploy-database
+	make d-mysql || true
 	make undeploy-example-app
 
 deploy-zeuspol:
@@ -84,20 +121,12 @@ deploy-hephaestus:
 undeploy-hephaestus:
 	helm uninstall hephaestus -n hephaestus
 
-# deploy-monitoring:
-# 	git clone https://github.com/microservices-demo/microservices-demo.git ./.monitoring
-# 	kubectl apply -f .monitoring/deploy/kubernetes/manifests-monitoring
-# 	kubectl apply -f .monitoring/deploy/kubernetes/manifests
-	
-# undeploy-monitoring:
-# 	kubectl delete -f .monitoring/deploy/kubernetes/manifests-monitoring
-# 	kubectl delete -f .monitoring/deploy/kubernetes/manifests
-		
-# kubecRBACProxy is used to enable a cluster role for prometheus, so it can query the metrics
 deploy-monitoring:
-	helm install monitoring prometheus-community/kube-prometheus-stack \
-	--namespace monitoring \
-	--create-namespace
+	helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+	--namespace monitoring  \
+	--create-namespace \
+	--set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false \
+	--set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
 
 undeploy-monitoring:
 	helm uninstall monitoring -n monitoring
@@ -111,6 +140,17 @@ undeploy-monitoring:
 	kubectl delete crd scrapeconfigs.monitoring.coreos.com
 	kubectl delete crd servicemonitors.monitoring.coreos.com
 	kubectl delete crd thanosrulers.monitoring.coreos.com
+	
+deploy-ingress:
+	helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+	--namespace ingress-nginx --create-namespace \
+	--namespace ingress-nginx \
+	--set controller.metrics.enabled=true \
+	--set controller.metrics.serviceMonitor.enabled=true \
+	--set controller.metrics.serviceMonitor.additionalLabels.release="monitoring"
+
+undeploy-ingress:
+	helm uninstall ingress-nginx -n ingress-nginx
 
 deploy-metrics-server:
 	helm install metrics-server bitnami/metrics-server --version 7.3.0 \
@@ -124,6 +164,13 @@ deploy-example-app:
 
 undeploy-example-app:
 	kubectl delete -f manifests/example-app
+
+deploy-response-time-test-app:
+	kubectl apply -f TestScenarios/response-time/manifests
+	./TestScenarios/response-time/scripts/update_hosts_file.sh
+
+undeploy-response-time-test-app:
+	kubectl delete -f TestScenarios/response-time/manifests
 
 deploy-database:
 	kubectl apply -f manifests/mysql
@@ -152,6 +199,9 @@ prepare-themis-secrets:
 
 	./scripts/generate_themis_openstack_secrets.sh
 
+delete-themis-secrets:
+	kubectl delete secrete -n $(THEMIS_NAMESPACE) $(THEMIS_K8S_SECRET_NAME) 
+
 reset-minikube:
 	minikube stop
 	minikube delete
@@ -169,3 +219,19 @@ undeploy-test-app:
 check-reequirements:
 	kubectl --version
 	yq --version
+
+mysql:
+	helm install mysql bitnami/mysql --version 12.2.1 \
+	--namespace mysql \
+	--create-namespace \
+	--set volumePermissions.enabled=true \
+	--set auth.database=pandora_box_db \
+	--set primary.service.type=NodePort \
+	--set primary.service.nodePorts.mysql=31222 \
+	--set primary.service.nodePorts.mysqlx=31223 \
+	--set auth.username=hermes \
+	--set auth.rooPassword=hermes \
+	--set auth.password=hermes 
+
+d-mysql:
+	helm uninstall mysql -n mysql
