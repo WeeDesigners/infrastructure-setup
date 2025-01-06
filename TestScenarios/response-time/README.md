@@ -45,6 +45,8 @@ sum(rate(nginx_ingress_controller_request_duration_seconds_sum{exported_service=
     - prometheus monitoring stack with graphana dashboards ( using prometheus operator helm charts )
     - ingress rules for this scenario
     - the test application using manifests files
+    
+    NOTE: This step may take w while, because minikube needs to download all docker images. Make you u have enough disk space!
 4. If everything went well, following resources should be available in your browser:
     - grafana -> http://grafana
     - prometheus -> http://prometheus
