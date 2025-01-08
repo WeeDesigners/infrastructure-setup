@@ -187,6 +187,8 @@ check-secret:
 prepare-helm-repo:
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo add bitnami https://charts.bitnami.com/bitnami
+	helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+	helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server
 	helm repo update
 
 prepare-themis-secrets-minikube:
@@ -220,6 +222,12 @@ check-reequirements:
 	kubectl --version
 	yq --version
 
+metrics-server:
+	helm upgrade --install metrics-server metrics-server/metrics-server
+
+d-metrics-server:
+	helm uninstall metrics-server
+
 mysql:
 	helm install mysql bitnami/mysql --version 12.2.1 \
 	--namespace mysql \
@@ -231,7 +239,7 @@ mysql:
 	--set primary.service.nodePorts.mysqlx=31223 \
 	--set auth.username=hermes \
 	--set auth.rooPassword=hermes \
-	--set auth.password=hermes 
+	--set auth.password=hermes
 
 d-mysql:
 	helm uninstall mysql -n mysql
