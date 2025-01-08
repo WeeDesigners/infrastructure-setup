@@ -229,12 +229,14 @@ d-metrics-server:
 	helm uninstall metrics-server
 
 mysql:
-	helm install mysql bitnami/mysql --version 12.2.1 \
+	helm upgrade --install mysql bitnami/mysql --version 12.2.1 \
 	--namespace mysql \
 	--create-namespace \
+	--set global.defaultStorageClass=mysql \
 	--set volumePermissions.enabled=true \
 	--set auth.database=pandora_box_db \
 	--set primary.service.type=NodePort \
+	--set primary.persistence.existingClaim=mysql-pvc \
 	--set primary.service.nodePorts.mysql=31222 \
 	--set primary.service.nodePorts.mysqlx=31223 \
 	--set auth.username=hermes \
