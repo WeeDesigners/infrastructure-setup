@@ -10,7 +10,7 @@ hermes:
     name: hermes
     port: 8080
     address: "0.0.0.0"
-    image: weedesigners/hermes:latest
+    image: weedesigners/hermes:master
     image_pull_policy: Always
 
 zeuspol:

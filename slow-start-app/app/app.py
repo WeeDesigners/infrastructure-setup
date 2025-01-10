@@ -20,6 +20,16 @@ def process_request_task():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/long-process", methods=["GET"])
+def long_process_request_task():
+    try:
+        # Simulate CPU-intensive work
+        for _ in range(10**8):  # Arbitrary computation to spike CPU
+            pass
+        return jsonify({"message": "Request processed successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/simulate-error", methods=["GET"])
 def simulate_error():
     # Simulate a server-side error (manual 500)
@@ -27,7 +37,7 @@ def simulate_error():
 
 # Simulate a slow app initialization
 print("Simulating app initialization delay...")
-sleep(60)  # Delay for 10 seconds
+sleep(60)  # Delay for 60 seconds
 print("App initialization complete.")
 
 if __name__ == "__main__":

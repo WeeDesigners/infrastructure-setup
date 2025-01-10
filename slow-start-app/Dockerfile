@@ -5,4 +5,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["uwsgi", "--http", "0.0.0.0:8080", "--wsgi-file", "app/app.py", "--callable", "app"]
+CMD ["uwsgi", "--ini", "uwsgi.ini"]
