@@ -27,8 +27,10 @@ spec:
               value: "http://{{ .Values.themis.service.name }}.{{ .Values.themis.namespace }}:{{ .Values.themis.service.port }}"
             - name: HERMES_URL
               value: "http://{{ .Values.hermes.service.name }}.{{ .Values.hermes.namespace}}:{{ .Values.hermes.service.port }}"
-            # - name: kubernetes-management
-            #   value: http://kubernetes-management.kubernetes-management:8097
+            - name: ZEUS_MAIL_PASSWORD
+              value: {{ .Values.zeuspol.mail.password}}
+            - name: ZEUS_MAIL_ADDRESS
+              value: {{ .Values.zeuspol.mail.address }}
 
           imagePullPolicy: {{ .Values.zeuspol.container.image_pull_policy }}
           ports:

@@ -12,6 +12,9 @@ zeuspol:
     address: "0.0.0.0"
     name: zeuspol
     image_pull_policy: Always
+  mail:
+    address: "email address placeholder"
+    password: "password placeholder"
   
 hephaestus:
   namespace: hephaestus
